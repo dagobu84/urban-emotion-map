@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Urban Emotion Map | Terminal de Diagnóstico 2026</title>
+    <style>
+        /* PALETA */
+        :root {
+            --azul-corp: #1a365d; 
+            --azul-oscuro: #0f2540; 
+            --gris-carbon: #1b222d;
+            --rojo-alerta: #e53e3e; 
+            --texto: #f7fafc; 
+            --amarillo: #ffc107; 
+            --verde: #22863a;
+            --muted: #6c757d;
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            background-color: var(--azul-oscuro); 
+            color: var(--texto);
+            font-family: 'Courier New', Courier, monospace; 
+            margin: 0; 
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* EFECTO DE ESCANEADO */
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.1) 50%), 
+                        linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 1000;
+            background-size: 100% 4px, 3px 100%;
+            pointer-events: none;
+        }
+
+        .terminal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            pointer-events: none; border: 15px solid rgba(26, 54, 93, 0.3); z-index: 100;
+        }
+
+        #diagnostic-tool {
+            flex: 1;
+            display: flex; 
+            flex-direction: column; 
+            justify-content: center; 
+            align-items: center; 
+            padding: 40px;
+            background: radial-gradient(circle, var(--azul-corp), var(--azul-oscuro));
+        }
+
+        .test-card {
+            background: var(--gris-carbon); 
+            padding: 40px; 
+            border-radius: 4px;
+            border: 1px solid var(--amarillo); 
+            max-width: 700px; 
+            text-align: center;
+            box-shadow: 0 0 40px rgba(0,0,0,0.8);
+            position: relative;
+        }
+
+        .system-log {
+            text-align: left;
+            font-size: 0.7rem;
+            color: var(--amarillo);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--azul-corp);
+            padding-bottom: 10px;
+            opacity: 0.8;
+        }
+
+        .options-grid {
+            display: grid; 
+            grid-template-columns: 1fr 1fr; 
+            gap: 15px; 
+            margin-top: 30px;
+        }
+
+        button {
+            background: var(--azul-corp); 
+            color: white; 
+            border: 1px solid var(--texto);
+            padding: 15px; 
+            cursor: pointer; 
+            transition: 0.3s; 
+            font-family: inherit;
+            text-transform: uppercase;
+        }
+
+        button:hover { 
+            background: var(--amarillo); 
+            color: black; 
+            font-weight: bold; 
+            box-shadow: 0 0 15px var(--amarillo);
+        }
+
+        section {
+            min-height: 100vh; 
+            padding: 60px 20px; 
+            display: none; 
+            animation: fadeIn 0.8s ease-in;
+            flex: 1;
+        }
+
+        .active { display: flex; align-items: center; justify-content: center; }
+
+        .content-grid {
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); 
+            gap: 50px; 
+            max-width: 1100px; 
+            margin: 0 auto; 
+            align-items: center;
+        }
+
+        .ia-metadata {
+            background: rgba(0,0,0,0.6); 
+            padding: 20px; 
+            border-radius: 4px;
+            font-size: 0.85rem; 
+            color: #cbd5e0; 
+            margin-top: 25px; 
+            border-left: 4px solid var(--amarillo);
+            font-family: 'Courier New', monospace;
+        }
+
+        .img-frame {
+            border: 1px solid var(--texto); 
+            padding: 15px; 
+            background: var(--gris-carbon);
+            box-shadow: 15px 15px 0px var(--azul-corp);
+            position: relative;
+        }
+
+        img { width: 100%; height: auto; display: block; filter: contrast(1.1); }
+
+        .btn-reset {
+            margin-top: 30px; 
+            background: var(--rojo-alerta); 
+            border: none; 
+            padding: 12px 25px;
+            color: white; 
+            font-weight: bold; 
+            cursor: pointer; 
+            text-transform: uppercase;
+        }
+
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: var(--gris-carbon);
+            border-top: 2px solid var(--azul-corp);
+            font-size: 0.8rem;
+            color: var(--muted);
+            z-index: 10;
+        }
+
+        .owner-highlight { color: var(--amarillo); font-weight: bold; text-transform: uppercase; letter-spacing: 2px; }
+
+        @keyframes fadeIn { 
+            from {opacity: 0; transform: translateY(30px);} 
+            to {opacity: 1; transform: translateY(0);} 
+        }
+    </style>
+</head>
+<body>
+
+    <div class="terminal-overlay"></div>
+
+    <main id="diagnostic-tool">
+        <div class="test-card">
+            <div class="system-log">
+                [LOG]: CORE_INIT_SUCCESS... <br>
+                [LOG]: ASSETS_LOADED_100%... <br>
+                [OWNER]: <span class="owner-highlight">DAVID GONZÁLEZ BUSTAMANTE</span>
+            </div>
+            <h1 style="font-size: 2rem; margin-bottom: 10px;">URBAN EMOTION MAP</h1>
+            <p style="color: var(--amarillo); font-size: 0.8rem; margin-bottom: 25px;">INTERFACE v2.0 | CO-CREACIÓN IA GENERATIVA</p>
+            
+            <div class="options-grid">
+                <button onclick="showEmotion('soledad')">01. Soledad</button>
+                <button onclick="showEmotion('ansiedad')">02. Ansiedad</button>
+                <button onclick="showEmotion('esperanza')">03. Esperanza</button>
+                <button onclick="showEmotion('conexion')">04. Conexión</button>
+            </div>
+        </div>
+    </main>
+
+    <section id="soledad">
+        <div class="content-grid">
+            <div class="img-frame">
+                <img src="images/soledad.jpg" alt="Soledad Urbana">
+            </div>
+            <div>
+                <h1 style="color: #667eea; font-size: 3rem;">SECTOR_01</h1>
+                <p style="font-size: 1.2rem; line-height: 1.6;">"Desde la vigésima planta, el mundo es un río de neón silencioso. La inmensidad, al fin, es solo tuya."</p>
+                <div class="ia-metadata">
+                    <strong>DOC_IA_EVIDENCIA:</strong><br>
+                    > Prompt: Una persona solitaria en el balcón de un rascacielos alto, contemplando una megaciudad expansiva iluminada con neón durante la noche. Las luces de la ciudad se funden y difuminan en un río de color, creando una profunda sensación de escala y aislamiento. Realismo onírico, resplandor etéreo, azules eléctricos profundos y tonos púrpura, estilo que recuerda a Edward Hopper mezclado con estética cyberpunk suave. Atmosfera melancólica pero visualmente hermosa.
+                </div>
+                <button class="btn-reset" onclick="reset()">REINICIAR ESCÁNER</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="ansiedad">
+        <div class="content-grid">
+            <div class="img-frame" style="box-shadow: 15px 15px 0px var(--rojo-alerta);">
+                <img src="images/ansiedad.jpg" alt="Ansiedad Urbana">
+            </div>
+            <div>
+                <h1 style="color: var(--rojo-alerta); font-size: 3rem;">SECTOR_02</h1>
+                <p style="font-size: 1.2rem; line-height: 1.6;">"La ciudad te envuelve en un zumbido constante. Eres una pieza más del mecanismo."</p>
+                <div class="ia-metadata">
+                    <strong>DOC_IA_EVIDENCIA:</strong><br>
+                    > Prompt: Una persona vista desde atrás, rodeada por una multitud en movimiento rápido en una calle bañada por luces de neón. Las luces y los anuncios publicitarios se transforman en patrones abstractos y opresivos. Atmosfera tensa y agobiante, dominada por azules eléctricos fríos y rosas vibrantes y estresantes. Arte digital, estilo cinematográfico, emocionalmente cargado.
+                </div>
+                <button class="btn-reset" onclick="reset()">REINICIAR ESCÁNER</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="esperanza">
+        <div class="content-grid">
+            <div class="img-frame" style="box-shadow: 15px 15px 0px var(--amarillo);">
+                <img src="images/esperanza.jpg" alt="Esperanza Urbana">
+            </div>
+            <div>
+                <h1 style="color: var(--amarillo); font-size: 3rem;">SECTOR_03</h1>
+                <p style="font-size: 1.2rem; line-height: 1.6;">"El amanecer pinta la ciudad con una luz nueva. Una flor desafía al hormigón."</p>
+                <div class="ia-metadata">
+                    <strong>DOC_IA_EVIDENCIA:</strong><br>
+                    > Prompt: Una pequeña luz naranja y cálida en medio de una vasta megaciudad de tonos fríos al amanecer. Una única planta creciendo a través del hormigón agrietado, con un suave resplandor. La sensación de un nuevo comienzo y una resistencia silenciosa. Arte digital onírico, estilo de Refik Anadol, estado de ánimo esperanzador, paleta de colores azul eléctrico y naranja suave.
+                </div>
+                <button class="btn-reset" onclick="reset()">REINICIAR ESCÁNER</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="conexion">
+        <div class="content-grid">
+            <div class="img-frame" style="box-shadow: 15px 15px 0px var(--verde);">
+                <img src="images/conexion.jpg" alt="Conexión Urbana">
+            </div>
+            <div>
+                <h1 style="color: var(--verde); font-size: 3rem;">SECTOR_04</h1>
+                <p style="font-size: 1.2rem; line-height: 1.6;">"La verdadera red no es la que envían las antenas, sino la que teje una mirada."</p>
+                <div class="ia-metadata">
+                    <strong>DOC_IA_EVIDENCIA:</strong><br>
+                    > Prompt: Dos siluetas compartiendo un momento en una azotea bajo un cielo nocturno lleno de flujos de datos luminosos y estrellas. Sus formas están conectadas por una luz sutil y cálida, que contrasta con la ciudad fría y azulada que hay debajo. Pintura digital, atmósfera poética, que representa la conexión humana genuina en la era digital
+                </div>
+                <button class="btn-reset" onclick="reset()">REINICIAR ESCÁNER</button>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <p>© 2026 | DGB | URBAN EMOTION MAP MULTIMEDIA SYSTEMS</p>
+    </footer>
+
+    <script>
+        function showEmotion(id) {
+            document.getElementById('diagnostic-tool').style.display = 'none';
+            document.querySelectorAll('section').forEach(s => s.classList.remove('active'));
+            document.getElementById(id).classList.add('active');
+            window.scrollTo(0,0);
+        }
+
+        function reset() {
+            location.reload();
+        }
+    </script>
+</body>
+</html>
